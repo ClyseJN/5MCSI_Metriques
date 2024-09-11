@@ -35,7 +35,7 @@ def mongraphique():
 def mongraphique2():
     return render_template("histogramme.html")
 
-@app.route('/extract-minutes/<date_string>')
+@app.route("/extract-minutes/<date_string>")
 def extract_minutes(date_string):
     try:
         date_object = datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%SZ')
@@ -44,7 +44,7 @@ def extract_minutes(date_string):
     except ValueError as e:
         return jsonify({'error': 'Invalid date format'}), 400
 
-@app.route('/github-commits/')
+@app.route("/commits/")
 def github_commits():
     try:
         url = 'https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits'
