@@ -1,1 +1,21 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commits Activity</title>
+</head>
+<body>
+    <h1>Recent Commits</h1>
+    
+    <ul>
+        {% for commit in commits %}
+            <li>
+                <strong>Commit Message:</strong> {{ commit.message }}<br>
+                <strong>Author:</strong> {{ commit.author }}<br>
+                <strong>Date:</strong> {{ commit.date }}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
