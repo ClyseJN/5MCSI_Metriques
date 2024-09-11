@@ -37,8 +37,7 @@ def mongraphique2():
 
 @app.route('/commits/')
 def index():
-    # Passe les commits extraits au template HTML
-    return render_template('commits.html', commits=commits_list)
+    return render_template("commits.html")
 
 @app.route('/extract-minutes/<date_string>')
 def extract_minutes(date_string):
