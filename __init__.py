@@ -35,9 +35,35 @@ def mongraphique():
 def mongraphique2():
     return render_template("histogramme.html")
 
+import requests
+from flask import render_template, jsonify
+
 @app.route('/commits/')
 def index():
-    return render_template('commits.html')
+    # URL de l'API GitHub pour le repository (modifie cette URL selon ton repo)
+    repo_api_url = "https://api.github.com/repos/ton-username/ton-repository/commits"
+    
+    # Effectue une requête GET pour récupérer la liste des commits
+    response = requests.get(repo_api_url)
+    
+    # Vérification que la requête est réussie (status code 200)
+    if response.status_code == 200:
+        commits_data = response.json()  # Parse les données JSON
+        
+        # On peut ici extraire des informations spécifiques sur chaque commit
+        commits_list = []
+        for commit in commits_data:
+            commit_info = {
+                'message': commit['commit']['message'],
+                'author': commit['commit']['author']['name'],
+                'date': commit['commit']['author']['date']
+            }
+            commits_list.append(commit_info)
+        
+        # Passe les commits extraits au template HTML
+        return render_template('commits.html', commits=commits_list)
+    else:
+        return jsonify({"error": "Unable to fetch commits from GitHub"}), 500
 
 @app.route('/extract-minutes/<date_string>')
 def extract_minutes(date_string):
