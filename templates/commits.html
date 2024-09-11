@@ -5,88 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commits par Minute</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f4f4f4;
+            color: #333;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
 
         .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
             background-color: #fff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 80%;
-            max-width: 1000px;
-            margin: 20px;
         }
 
         h1 {
             text-align: center;
             font-size: 2.5em;
+            margin-bottom: 20px;
             color: #333;
-            margin-bottom: 40px;
         }
 
         #chart_div {
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+            display: grid;
+            grid-template-columns: repeat(60, 1fr);
+            grid-gap: 2px;
             margin-top: 20px;
         }
 
-        th, td {
-            padding: 15px 20px;
-            border: 1px solid #ddd;
-            text-align: center;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
+        .grid-item {
+            width: 100%;
+            padding-bottom: 100%; /* Aspect ratio 1:1 */
+            background-color: #ebedf0;
+            border-radius: 3px;
         }
 
-        th {
-            background-color: #6c63ff;
+        .grid-item.level-1 { background-color: #c6e48b; }
+        .grid-item.level-2 { background-color: #7bc96f; }
+        .grid-item.level-3 { background-color: #239a3b; }
+        .grid-item.level-4 { background-color: #196127; }
+
+        .tooltip {
+            position: absolute;
+            background-color: #333;
             color: white;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            visibility: hidden;
+            z-index: 10;
         }
 
-        td:hover {
-            background-color: #f1f1f1;
-        }
-
-        td {
-            background-color: white;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                width: 95%;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            th, td {
-                padding: 12px 15px;
-                font-size: 0.9em;
-            }
+        .grid-item:hover .tooltip {
+            visibility: visible;
         }
     </style>
 </head>
@@ -100,9 +75,9 @@
 <script type="text/javascript">
     // Charger la bibliothèque Google Charts
     google.charts.load('current', {packages: ['table']});
-    google.charts.setOnLoadCallback(drawTable);
+    google.charts.setOnLoadCallback(drawGrid);
 
-    function drawTable() {
+    function drawGrid() {
         // Récupération des commits via l'API GitHub
         fetch('https://api.github.com/repos/ClyseJN/5MCSI_Metriques/commits')
             .then(response => response.json())
@@ -127,28 +102,44 @@
                             }
                         });
                 })).then(() => {
-                    // Préparer les données pour le tableau
-                    const dataArray = [['Minute', 'Nombre de Commits']];
-                    for (const minute in commitsByMinute) {
-                        dataArray.push([minute, commitsByMinute[minute]]);
+                    // Préparer la grille des commits par minute
+                    const grid = document.getElementById('chart_div');
+
+                    // Boucle sur 60 minutes
+                    for (let i = 0; i < 60; i++) {
+                        const commits = commitsByMinute[i] || 0;
+                        const level = getCommitLevel(commits);
+
+                        // Création de l'élément de grille
+                        const gridItem = document.createElement('div');
+                        gridItem.classList.add('grid-item', `level-${level}`);
+
+                        // Tooltip pour afficher le nombre de commits
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('tooltip');
+                        tooltip.innerText = `Minute ${i}: ${commits} commits`;
+
+                        gridItem.appendChild(tooltip);
+                        grid.appendChild(gridItem);
                     }
-
-                    // Convertir le tableau de données pour Google Charts
-                    const dataTable = google.visualization.arrayToDataTable(dataArray);
-
-                    // Options pour le rendu du tableau
-                    const options = {
-                        showRowNumber: true,
-                        width: '100%',
-                        height: 'auto'
-                    };
-
-                    // Afficher le tableau dans l'élément spécifié
-                    const table = new google.visualization.Table(document.getElementById('chart_div'));
-                    table.draw(dataTable, options);
                 });
             })
             .catch(error => console.error('Erreur lors de la récupération des données :', error));
+    }
+
+    // Fonction pour définir le niveau de couleur en fonction du nombre de commits
+    function getCommitLevel(commits) {
+        if (commits > 10) {
+            return 4;
+        } else if (commits > 5) {
+            return 3;
+        } else if (commits > 2) {
+            return 2;
+        } else if (commits > 0) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 </script>
 
