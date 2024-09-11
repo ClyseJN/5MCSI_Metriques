@@ -45,27 +45,8 @@ def extract_minutes(date_string):
         return jsonify({'error': 'Invalid date format'}), 400
 
 @app.route("/commits/")
-def commits():
+def mescommits():
     return render_template("commits.html")
-
-@app.route("/api/commits/")
-def api_commits():
-    try:
-        url = 'https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits'
-        response = urlopen(url)
-        raw_content = response.read()
-        json_content = json.loads(raw_content.decode('utf-8'))
-
-        commit_data = []
-        for commit in json_content:
-            commit_info = {
-                'author': commit.get('commit', {}).get('author', {}).get('name', 'Unknown Author'),
-                'date': commit.get('commit', {}).get('author', {}).get('date', 'Unknown Date'),
-                'message': commit.get('commit', {}).get('message', 'No Message')
-            }
-            commit_data.append(commit_info)
-
-        return jsonify(commit_data=commit_data)
 
 if __name__ == "__main__":
   app.run(debug=True)
