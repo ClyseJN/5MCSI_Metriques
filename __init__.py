@@ -45,7 +45,7 @@ def extract_minutes(date_string):
         return jsonify({'error': 'Invalid date format'}), 400
 
 @app.route("/commits/")
-def mongraphique():
+def mescommits():
     return render_template("commits.html")
 
 if __name__ == "__main__":
