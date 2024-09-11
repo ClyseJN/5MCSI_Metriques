@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation des Commits</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4a90e2;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .date {
+            font-style: italic;
+            color: #666;
+        }
+        .author {
+            font-weight: bold;
+            color: #333;
+        }
+        .commit-message {
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visualisation des Commits</h1>
+        <table id="commits-table">
+            <thead>
+                <tr>
+                    <th>Auteur</th>
+                    <th>Date</th>
+                    <th>Message du Commit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les données des commits seront insérées ici -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fonction pour récupérer les commits depuis l'API Flask
+        async function fetchCommits() {
+            try {
+                const response = await fetch('/commits/');
+                const data = await response.json();
+                const commitsTableBody = document.querySelector('#commits-table tbody');
+
+                data.commit_dates.forEach(commit => {
+                    const row = document.createElement('tr');
+
+                    const authorCell = document.createElement('td');
+                    authorCell.textContent = 'Auteur'; // Remplacer avec les données d'auteur réelles si disponibles
+                    row.appendChild(authorCell);
+
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = commit;
+                    dateCell.classList.add('date');
+                    row.appendChild(dateCell);
+
+                    const messageCell = document.createElement('td');
+                    messageCell.textContent = 'Message du commit'; // Remplacer avec les messages de commit réels si disponibles
+                    messageCell.classList.add('commit-message');
+                    row.appendChild(messageCell);
+
+                    commitsTableBody.appendChild(row);
