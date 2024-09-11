@@ -35,6 +35,10 @@ def mongraphique():
 def mongraphique2():
     return render_template("histogramme.html")
 
+@app.route("/commits/")
+def mescommits():
+    return render_template("commits.html")
+
 @app.route("/extract-minutes/<date_string>")
 def extract_minutes(date_string):
     try:
@@ -43,10 +47,6 @@ def extract_minutes(date_string):
         return jsonify({'minutes': minutes})
     except ValueError as e:
         return jsonify({'error': 'Invalid date format'}), 400
-
-@app.route("/commits/")
-def mescommits():
-    return render_template("commits.html")
 
 if __name__ == "__main__":
   app.run(debug=True)
