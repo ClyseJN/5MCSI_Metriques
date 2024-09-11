@@ -81,41 +81,40 @@
     </div>
 
     <script>
-        // Fonction pour récupérer les commits depuis l'API Flask
-        async function fetchCommits() {
-            try {
-                const response = await fetch('/commits/');
-                const data = await response.json();
-                const commitsTableBody = document.querySelector('#commits-table tbody');
+       // Fonction pour récupérer les commits depuis l'API Flask
+async function fetchCommits() {
+    try {
+        const response = await fetch('/api/commits/');
+        const data = await response.json();
+        const commitsTableBody = document.querySelector('#commits-table tbody');
 
-                data.commit_dates.forEach(commit => {
-                    const row = document.createElement('tr');
+        data.commit_data.forEach(commit => {
+            const row = document.createElement('tr');
 
-                    // Ces informations doivent être remplacées par les données réelles de l'API
-                    const authorCell = document.createElement('td');
-                    authorCell.textContent = 'Auteur'; // Remplace par l'auteur réel si disponible
-                    authorCell.classList.add('author');
-                    row.appendChild(authorCell);
+            const authorCell = document.createElement('td');
+            authorCell.textContent = commit.author;
+            authorCell.classList.add('author');
+            row.appendChild(authorCell);
 
-                    const dateCell = document.createElement('td');
-                    dateCell.textContent = commit;
-                    dateCell.classList.add('date');
-                    row.appendChild(dateCell);
+            const dateCell = document.createElement('td');
+            dateCell.textContent = commit.date;
+            dateCell.classList.add('date');
+            row.appendChild(dateCell);
 
-                    const messageCell = document.createElement('td');
-                    messageCell.textContent = 'Message du commit'; // Remplace par le message réel du commit si disponible
-                    messageCell.classList.add('commit-message');
-                    row.appendChild(messageCell);
+            const messageCell = document.createElement('td');
+            messageCell.textContent = commit.message;
+            messageCell.classList.add('commit-message');
+            row.appendChild(messageCell);
 
-                    commitsTableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Erreur lors de la récupération des commits:', error);
-            }
-        }
+            commitsTableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des commits:', error);
+    }
+}
 
-        // Appel de la fonction pour charger les commits lorsque la page se charge
-        document.addEventListener('DOMContentLoaded', fetchCommits);
+// Appel de la fonction pour charger les commits lorsque la page se charge
+document.addEventListener('DOMContentLoaded', fetchCommits);
     </script>
 </body>
 </html>
