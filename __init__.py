@@ -58,8 +58,7 @@ def github_commits():
             if date_string:
                 commit_dates.append(date_string)
         
-        return jsonify({'commit_dates': commit_dates})
-        return render_template("commits.html")
+        return jsonify({'commit_dates': commit_dates}), render_template("commits.html")
 
     except Exception as e:
         return jsonify({"error": str(e)})
