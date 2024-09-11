@@ -1,21 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commits Activity</title>
+    <title>Commits par Minute</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: 50px auto;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Recent Commits</h1>
-    
-    <ul>
-        {% for commit in commits %}
-            <li>
-                <strong>Commit Message:</strong> {{ commit.message }}<br>
-                <strong>Author:</strong> {{ commit.author }}<br>
-                <strong>Date:</strong> {{ commit.date }}
-            </li>
-        {% endfor %}
-    </ul>
+
+<div class="container">
+    <h1>Nombre de commits par minute</h1>
+    <div id="chart_div" style="width: 100%; height: 500px;"></div>
+</div>
+
+<script type="text/javascript">
+    // Charger la bibliothèque Google Charts
+    google.charts.load('current', {packages: ['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        // Récupération des commits via l'API GitHub
+        fetch('https://api.github.com/repos/ClyseJN/5MCSI_Metriques/commits')
+            .then(response => response.json())
+            .then(data => {
+                const commitsByMinute = {};
+
+                // Parcourir chaque commit et extraire la date
+                Promise.all(data.map(commitData => {
+                    const commitDate = commitData.commit.author.date;
+
+                    // Appel à l'API Flask pour extraire les minutes du commit
+                    return fetch(`/extract-minutes/${encodeURIComponent(commitDate)}`)
+                        .then(response => response.json())
+                        .then(result => {
+                            const minute = result.minutes;
+
+                            // Compter le nombre de commits par minute
+                            if (!commitsByMinute[minute]) {
+                                commitsByMinute[minute] = 1;
+                            } else {
+                                commitsByMinute[minute]++;
+                            }
+                        });
+                })).then(() => {
+                    // Préparer les données pour l'histogramme
+                    const dataArray = [['Minute', 'Nombre de Commits']];
+                    for (const minute in commitsByMinute) {
+                        dataArray.push([minute, commitsByMinute[minute]]);
+                    }
+
+                    // Convertir le tableau de données pour Google Charts
+                    const dataTable = google.visualization.arrayToDataTable(dataArray);
+
+                    // Options pour l'histogramme
+                    const options = {
+                        title: 'Nombre de commits par minute',
+                        legend: { position: 'none' },
+                        hAxis: {
+                            title: 'Minutes',
+                            format: '0'
+                        },
+                        vAxis: {
+                            title: 'Nombre de Commits'
+                        },
+                        histogram: {
+                            bucketSize: 1
+                        },
+                        colors: ['#6c63ff']
+                    };
+
+                    // Afficher l'histogramme dans l'élément spécifié
+                    const chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+                    chart.draw(dataTable, options);
+                });
+            })
+            .catch(error => console.error('Erreur lors de la récupération des données :', error));
+    }
+</script>
+
 </body>
 </html>
