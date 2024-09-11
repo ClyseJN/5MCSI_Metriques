@@ -3,32 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualisation des Commits</title>
+    <title>Commits par Minute</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
         }
         .container {
-            width: 80%;
-            max-width: 1200px;
-            margin: 20px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90%;
+            margin: 50px auto;
         }
         h1 {
             text-align: center;
-            color: #4a90e2;
-            margin-bottom: 20px;
         }
         table {
             width: 100%;
@@ -36,85 +25,77 @@
             margin-top: 20px;
         }
         th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: center;
         }
         th {
-            background-color: #4a90e2;
-            color: #fff;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        .date {
-            font-style: italic;
-            color: #666;
-        }
-        .author {
-            font-weight: bold;
-            color: #333;
-        }
-        .commit-message {
-            color: #444;
+            background-color: #6c63ff;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Visualisation des Commits</h1>
-        <table id="commits-table">
-            <thead>
-                <tr>
-                    <th>Auteur</th>
-                    <th>Date</th>
-                    <th>Message du Commit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Les données des commits seront insérées ici -->
-            </tbody>
-        </table>
-    </div>
 
-    <script>
-       // Fonction pour récupérer les commits depuis l'API Flask
-async function fetchCommits() {
-    try {
-        const response = await fetch('/api/commits/');
-        const data = await response.json();
-        const commitsTableBody = document.querySelector('#commits-table tbody');
+<div class="container">
+    <h1>Nombre de commits par minute</h1>
+    <div id="chart_div" style="width: 100%;"></div>
+</div>
 
-        data.commit_data.forEach(commit => {
-            const row = document.createElement('tr');
+<script type="text/javascript">
+    // Charger la bibliothèque Google Charts
+    google.charts.load('current', {packages: ['table']});
+    google.charts.setOnLoadCallback(drawTable);
 
-            const authorCell = document.createElement('td');
-            authorCell.textContent = commit.author;
-            authorCell.classList.add('author');
-            row.appendChild(authorCell);
+    function drawTable() {
+        // Récupération des commits via l'API GitHub
+        fetch('https://api.github.com/repos/Eliashnf/5MCSI_Metriques/commits')
+            .then(response => response.json())
+            .then(data => {
+                const commitsByMinute = {};
 
-            const dateCell = document.createElement('td');
-            dateCell.textContent = commit.date;
-            dateCell.classList.add('date');
-            row.appendChild(dateCell);
+                // Parcourir chaque commit et extraire la date
+                Promise.all(data.map(commitData => {
+                    const commitDate = commitData.commit.author.date;
 
-            const messageCell = document.createElement('td');
-            messageCell.textContent = commit.message;
-            messageCell.classList.add('commit-message');
-            row.appendChild(messageCell);
+                    // Appel à l'API Flask pour extraire les minutes du commit
+                    return fetch(`/extract-minutes/${encodeURIComponent(commitDate)}`)
+                        .then(response => response.json())
+                        .then(result => {
+                            const minute = result.minutes;
 
-            commitsTableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Erreur lors de la récupération des commits:', error);
+                            // Compter le nombre de commits par minute
+                            if (!commitsByMinute[minute]) {
+                                commitsByMinute[minute] = 1;
+                            } else {
+                                commitsByMinute[minute]++;
+                            }
+                        });
+                })).then(() => {
+                    // Préparer les données pour le tableau
+                    const dataArray = [['Minute', 'Nombre de Commits']];
+                    for (const minute in commitsByMinute) {
+                        dataArray.push([minute, commitsByMinute[minute]]);
+                    }
+
+                    // Convertir le tableau de données pour Google Charts
+                    const dataTable = google.visualization.arrayToDataTable(dataArray);
+
+                    // Options pour le rendu du tableau
+                    const options = {
+                        showRowNumber: true,
+                        width: '100%',
+                        height: 'auto'
+                    };
+
+                    // Afficher le tableau dans l'élément spécifié
+                    const table = new google.visualization.Table(document.getElementById('chart_div'));
+                    table.draw(dataTable, options);
+                });
+            })
+            .catch(error => console.error('Erreur lors de la récupération des données :', error));
     }
-}
+</script>
 
-// Appel de la fonction pour charger les commits lorsque la page se charge
-document.addEventListener('DOMContentLoaded', fetchCommits);
-    </script>
 </body>
 </html>
