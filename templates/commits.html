@@ -19,21 +19,35 @@
         h1 {
             text-align: center;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #6c63ff;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Nombre de commits par minute</h1>
-    <div id="chart_div" style="width: 100%; height: 500px;"></div>
+    <div id="chart_div" style="width: 100%;"></div>
 </div>
 
 <script type="text/javascript">
     // Charger la bibliothèque Google Charts
-    google.charts.load('current', {packages: ['corechart']});
-    google.charts.setOnLoadCallback(drawChart);
+    google.charts.load('current', {packages: ['table']});
+    google.charts.setOnLoadCallback(drawTable);
 
-    function drawChart() {
+    function drawTable() {
         // Récupération des commits via l'API GitHub
         fetch('https://api.github.com/repos/ClyseJN/5MCSI_Metriques/commits')
             .then(response => response.json())
@@ -58,7 +72,7 @@
                             }
                         });
                 })).then(() => {
-                    // Préparer les données pour l'histogramme
+                    // Préparer les données pour le tableau
                     const dataArray = [['Minute', 'Nombre de Commits']];
                     for (const minute in commitsByMinute) {
                         dataArray.push([minute, commitsByMinute[minute]]);
@@ -67,26 +81,16 @@
                     // Convertir le tableau de données pour Google Charts
                     const dataTable = google.visualization.arrayToDataTable(dataArray);
 
-                    // Options pour l'histogramme
+                    // Options pour le rendu du tableau
                     const options = {
-                        title: 'Nombre de commits par minute',
-                        legend: { position: 'none' },
-                        hAxis: {
-                            title: 'Minutes',
-                            format: '0'
-                        },
-                        vAxis: {
-                            title: 'Nombre de Commits'
-                        },
-                        histogram: {
-                            bucketSize: 1
-                        },
-                        colors: ['#6c63ff']
+                        showRowNumber: true,
+                        width: '100%',
+                        height: 'auto'
                     };
 
-                    // Afficher l'histogramme dans l'élément spécifié
-                    const chart = new google.visualization.Histogram(document.getElementById('chart_div'));
-                    chart.draw(dataTable, options);
+                    // Afficher le tableau dans l'élément spécifié
+                    const table = new google.visualization.Table(document.getElementById('chart_div'));
+                    table.draw(dataTable, options);
                 });
             })
             .catch(error => console.error('Erreur lors de la récupération des données :', error));
