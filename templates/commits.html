@@ -46,6 +46,11 @@
         .footer-link:hover {
             text-decoration: underline;
         }
+        .error-message {
+            color: red;
+            text-align: center;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -54,6 +59,7 @@
     <h1>Nombre de Commits par Minute</h1>
     <div class="chart-container">
         <canvas id="commitChart"></canvas>
+        <div id="error-message" class="error-message"></div>
     </div>
 </div>
 
@@ -62,15 +68,25 @@
 </footer>
 
 <script>
+    // Fonction pour afficher les messages d'erreur
+    function showError(message) {
+        document.getElementById('error-message').innerText = message;
+    }
+
     // Appeler l'API Flask pour obtenir les commits minute par minute
     fetch('/commits/')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur de réseau');
+            }
+            return response.json();
+        })
         .then(data => {
             const labels = Object.keys(data);  // Les minutes (ex: "11:57")
             const commitCounts = Object.values(data);  // Le nombre de commits
 
             const ctx = document.getElementById('commitChart').getContext('2d');
-            const commitChart = new Chart(ctx, {
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -104,7 +120,10 @@
                 }
             });
         })
-        .catch(error => console.error('Erreur lors de la récupération des données :', error));
+        .catch(error => {
+            console.error('Erreur lors de la récupération des données :', error);
+            showError('Erreur lors de la récupération des données. Veuillez réessayer.');
+        });
 </script>
 
 </body>
