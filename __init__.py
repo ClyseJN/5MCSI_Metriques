@@ -41,7 +41,7 @@ from flask import render_template, jsonify
 @app.route('/commits/')
 def index():
     # URL de l'API GitHub pour le repository (modifie cette URL selon ton repo)
-    repo_api_url = "https://api.github.com/repos/ton-username/ton-repository/commits"
+    repo_api_url = "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits"
     
     # Effectue une requête GET pour récupérer la liste des commits
     response = requests.get(repo_api_url)
