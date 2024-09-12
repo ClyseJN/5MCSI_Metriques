@@ -30,24 +30,41 @@
             color: #333;
         }
 
-        #chart_div {
-            display: grid;
-            grid-template-columns: repeat(60, 1fr);
-            grid-gap: 2px;
-            margin-top: 20px;
-        }
-
-        .grid-item {
+        table {
             width: 100%;
-            padding-bottom: 100%; /* Aspect ratio 1:1 */
-            background-color: #ebedf0;
-            border-radius: 3px;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .grid-item.level-1 { background-color: #1cfb01; }
-        .grid-item.level-2 { background-color: #14a902; }
-        .grid-item.level-3 { background-color: #14a902; }
-        .grid-item.level-4 { background-color: #0e6f02; }
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #6c63ff;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        td {
+            background-color: #ebedf0;
+            color: #333;
+        }
+
+        /* Coloration des cellules en fonction du nombre de commits */
+        td.level-1 { background-color: #c6e48b; }
+        td.level-2 { background-color: #7bc96f; }
+        td.level-3 { background-color: #239a3b; }
+        td.level-4 { background-color: #196127; }
+
+        /* Animation au survol des cellules */
+        td:hover {
+            background-color: #ddd;
+            cursor: pointer;
+        }
 
         .tooltip {
             position: absolute;
@@ -60,7 +77,7 @@
             z-index: 10;
         }
 
-        .grid-item:hover .tooltip {
+        td:hover .tooltip {
             visibility: visible;
         }
     </style>
@@ -69,15 +86,25 @@
 
 <div class="container">
     <h1>Nombre de commits par minute</h1>
-    <div id="chart_div"></div>
+    <table id="commitTable">
+        <thead>
+            <tr>
+                <th>Minute</th>
+                <th>Nombre de Commits</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les données du tableau seront insérées ici via JavaScript -->
+        </tbody>
+    </table>
 </div>
 
 <script type="text/javascript">
     // Charger la bibliothèque Google Charts
     google.charts.load('current', {packages: ['table']});
-    google.charts.setOnLoadCallback(drawGrid);
+    google.charts.setOnLoadCallback(drawTable);
 
-    function drawGrid() {
+    function drawTable() {
         // Récupération des commits via l'API GitHub
         fetch('https://api.github.com/repos/ClyseJN/5MCSI_Metriques/commits')
             .then(response => response.json())
@@ -102,25 +129,25 @@
                             }
                         });
                 })).then(() => {
-                    // Préparer la grille des commits par minute
-                    const grid = document.getElementById('chart_div');
-
-                    // Boucle sur 60 minutes
+                    // Insérer les données dans le tableau
+                    const tableBody = document.querySelector("#commitTable tbody");
                     for (let i = 0; i < 60; i++) {
                         const commits = commitsByMinute[i] || 0;
                         const level = getCommitLevel(commits);
 
-                        // Création de l'élément de grille
-                        const gridItem = document.createElement('div');
-                        gridItem.classList.add('grid-item', `level-${level}`);
+                        const row = document.createElement('tr');
 
-                        // Tooltip pour afficher le nombre de commits
-                        const tooltip = document.createElement('div');
-                        tooltip.classList.add('tooltip');
-                        tooltip.innerText = `Minute ${i}: ${commits} commits`;
+                        const minuteCell = document.createElement('td');
+                        minuteCell.textContent = i;
 
-                        gridItem.appendChild(tooltip);
-                        grid.appendChild(gridItem);
+                        const commitsCell = document.createElement('td');
+                        commitsCell.textContent = commits;
+                        commitsCell.classList.add(`level-${level}`);
+
+                        row.appendChild(minuteCell);
+                        row.appendChild(commitsCell);
+
+                        tableBody.appendChild(row);
                     }
                 });
             })
